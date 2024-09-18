@@ -43,8 +43,9 @@ head(DENSITE)
 illeetvilaine2<-merge(illeetvilaine,DENSITE,bx=CODGEO,by=1)
 
 colnames(illeetvilaine2$V2,do.NULL = TRUE, prefix = "col") 
-colnames(illeetvilaine2)[2]<- "DEN"
-head
+colnames(illeetvilaine2)[8]<- "DEN"
+head(illeetvilaine2)
+illeetvilaine2$DEN<- as.numeric(illeetvilaine2$DEN)
 #4 On considère qu’une commune est dense si sa densité est supérieure ou égale à 1500 hab/km2, de
 #densité intermédiaire si sa densité est comprise dans [300;1500[ hab/km2, peu dense si comprise dans [25;300[ hab/km2 et 
 #très peu dense si < 25 hab/km2. Créer une variable CATEGORIECOMMUNE
@@ -53,7 +54,38 @@ head
 #combinée avec la fonction factor.
 
 
-illeetvilaine$categoriedecommune <- factor(ifelse(illeetvilaine$DEN>1500,"tres dense"))
+illeetvilaine2$categoriedecommune <- factor(ifelse(illeetvilaine2$DEN>=1500,"dense",
+                                                  ifelse(illeetvilaine2$DEN>=300,"densite intermediaire",
+                                                         ifelse(illeetvilaine2$DEN>=25,"faible densite",
+                                                                ifelse(illeetvilaine2$DEN>=0,"tres peu dense")))))
+
+head(illeetvilaine2)
+
+#5 La fonction within() permet d’éviter de toujours répéter le nom d’une table pour accéder aux variables.
+#Vous avez pu constater que le nom de la table était souvent appelé dans le code, dès lors que l’on créait
+#une nouvelle variable. Essayer de faire la question précédente, en utilisant la fonction within(). La
+#logique reste la même (utilisation de la fonction factor avec ifelse).Vous effectuerez ce traitement dans
+#une nouvelle table qui s’appellera illetvilaine2.
 
 
+illeetvilaine3 <- within(illeetvilaine2, factor(ifelse(DEN>=1500,"dense",
+                                                         ifelse(DEN>=300,"densite intermediaire",
+                                                                ifelse(DEN>=25,"faible densite",
+                                                                       ifelse(DEN>=0,"tres peu dense"))))))
+summary(illeetvilaine3)
+head(illeetvilaine3)
+# 6 A l’aide de la fonction setdiff(), assurez-vous que les tables illeetvilaine et illeetvilaine2 sont les
+#mêmes
+setdiff(illeetvilaine3,illeetvilaine2) #nornalement n'affiche rien probleme elle affiche quelque chose dc la table 2 et 3 sont differentes je ne comprend pas 2 OK
 
+#7 Combien y a t’il de communes pour chacune des modalités de cette nouvelle variable ? Faites un
+#diagramme en baton ayant en abscisse les modalités et en ordonnée les effectifs
+
+table(illeetvilaine2$categoriedecommune)
+plot(table(illeetvilaine2$categoriedecommune))
+
+#8 Afficher maintenant non pas les effectifs mais les pourcentages pour chacune des modalités. On utilisera
+#pour cela la fonction prop.table(). Cette fonction prend en paramètre d’entrée un tableau d’effectif
+#tel que construit dans la question précédente.
+
+prop.table(table(illeetvilaine2$categoriedecommune))
